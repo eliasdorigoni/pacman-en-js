@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pacman</title>
+    <style>
+        .wrapper {
+            position: relative;
+        }
+        canvas {
+            height: calc(22px * 27);
+            width: calc(22px * 21);
+        }
+         #characters {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <canvas id="characters" width="840" height="1080"></canvas>
+        <canvas id="world" width="840" height="1080"></canvas>
+    </div>
+
+    <script src="scripts/helpers.js"></script>
+    <script src="scripts/world.js"></script>
+    <script src="scripts/characters.js"></script>
+</body>
+</html>
