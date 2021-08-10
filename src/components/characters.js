@@ -1,4 +1,7 @@
-const event = new CustomEvent('character-position', { character: this });
+import config from './../config.yaml';
+import walkablePath from './characters/walkable-path.json'
+const event = new CustomEvent('character-position', { character: this })
+
 
 const Character = {
     canvas: null,
@@ -38,8 +41,8 @@ const Character = {
     draw: function() {
         this.ctx.drawImage(
             this.animations.currentAnimation[this.animations.nextFrame],
-            this.x * window.tileSize,
-            this.y * window.tileSize
+            this.x * config.tileSize,
+            this.y * config.tileSize
         )
 
         if (this.animations.nextFrame >= this.animations.lastFrame) {
@@ -50,10 +53,10 @@ const Character = {
     },
     undraw: function() {
         this.ctx.clearRect(
-            this.x * window.tileSize,
-            this.y * window.tileSize,
-            window.tileSize, window.tileSize
-        );
+            this.x * config.tileSize,
+            this.y * config.tileSize,
+            config.tileSize, config.tileSize
+        )
     },
     allowedMoves: function() {
         // Pasajes del medio
@@ -62,19 +65,19 @@ const Character = {
         }
 
         let walkables = []
-        if (walkableTiles[this.y - 1][this.x] === 1) {
+        if (walkablePath[this.y - 1][this.x] === 1) {
             walkables.push('up')
         }
 
-        if (walkableTiles[this.y + 1][this.x] === 1) {
+        if (walkablePath[this.y + 1][this.x] === 1) {
             walkables.push('down')
         }
 
-        if (walkableTiles[this.y][this.x - 1] === 1) {
+        if (walkablePath[this.y][this.x - 1] === 1) {
             walkables.push('left')
         }
 
-        if (walkableTiles[this.y][this.x + 1] === 1) {
+        if (walkablePath[this.y][this.x + 1] === 1) {
             walkables.push('right')
         }
 
@@ -103,7 +106,12 @@ const Character = {
         clearInterval(this.movement.interval)
         this.movement.interval = setInterval(() => {
             this.undraw()
-            if (this.direction.current === 'up') {
+
+            if (this.y === 13 && (this.x === 0 && this.direction.current === 'left')) {
+                this.x = 20
+            } else if (this.y === 13 && (this.x === 20 && this.direction.current === 'right')) {
+                this.x = 0
+            } else if (this.direction.current === 'up') {
                 this.y--
             } else if (this.direction.current === 'down') {
                 this.y++
@@ -112,9 +120,15 @@ const Character = {
             } else if (this.direction.current === 'right') {
                 this.x++
             }
-            console.log('Moviendo -> ' + this.direction.current)
+
             this.draw()
-            this.canvas.dispatchEvent(new CustomEvent('character-position', { detail: this }))
+            this.canvas.dispatchEvent(new CustomEvent('character-position', {
+                detail: {
+                    type: this.type,
+                    x: this.x,
+                    y: this.y
+                }
+            }))
 
             if (this.canMoveTo(this.direction.queued)) {
                 this.setAnimation(this.direction.queued)
@@ -166,65 +180,34 @@ let pacman = Object.assign({}, Character),
     pinky = Object.assign({}, Character),
     clyde = Object.assign({}, Character)
 
-// 0: no, 1: sí (jugador y cpu), 2: sí (solo cpu)
-const walkableTiles = [
-    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
-    [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ],
-    [ 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0 ],
-    [ 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0 ],
-    [ 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0 ],
-    [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ],
-    [ 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0 ],
-    [ 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0 ],
-    [ 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0 ],
-    [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0 ],
-    [ 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0 ],
-    [ 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0 ],
-    [ 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0 ],
-    [ 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1 ],
-    [ 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0 ],
-    [ 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0 ],
-    [ 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0 ],
-    [ 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0 ],
-    [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ],
-    [ 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0 ],
-    [ 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0 ],
-    [ 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0 ],
-    [ 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0 ],
-    [ 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0 ],
-    [ 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0 ],
-    [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ],
-    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
-];
-
 const preloadCharacters = (callback) => {
     pacman.loadAnimations({
         idle: [
-            'svg/characters/pacman/right-smaller.svg',
+            require('./characters/pacman/frames/right-smaller.svg'),
         ],
         up: [
-            'svg/characters/pacman/up-smaller.svg',
-            'svg/characters/pacman/up-small.svg',
-            'svg/characters/pacman/closed.svg',
-            'svg/characters/pacman/up-small.svg',
+            require('./characters/pacman/frames/up-smaller.svg'),
+            require('./characters/pacman/frames/up-small.svg'),
+            require('./characters/pacman/frames/closed.svg'),
+            require('./characters/pacman/frames/up-small.svg'),
         ],
         right: [
-            'svg/characters/pacman/right-smaller.svg',
-            'svg/characters/pacman/right-small.svg',
-            'svg/characters/pacman/closed.svg',
-            'svg/characters/pacman/right-small.svg',
+            require('./characters/pacman/frames/right-smaller.svg'),
+            require('./characters/pacman/frames/right-small.svg'),
+            require('./characters/pacman/frames/closed.svg'),
+            require('./characters/pacman/frames/right-small.svg'),
         ],
         down: [
-            'svg/characters/pacman/down-smaller.svg',
-            'svg/characters/pacman/down-small.svg',
-            'svg/characters/pacman/closed.svg',
-            'svg/characters/pacman/down-small.svg',
+            require('./characters/pacman/frames/down-smaller.svg'),
+            require('./characters/pacman/frames/down-small.svg'),
+            require('./characters/pacman/frames/closed.svg'),
+            require('./characters/pacman/frames/down-small.svg'),
         ],
         left: [
-            'svg/characters/pacman/left-smaller.svg',
-            'svg/characters/pacman/left-small.svg',
-            'svg/characters/pacman/closed.svg',
-            'svg/characters/pacman/left-small.svg',
+            require('./characters/pacman/frames/left-smaller.svg'),
+            require('./characters/pacman/frames/left-small.svg'),
+            require('./characters/pacman/frames/closed.svg'),
+            require('./characters/pacman/frames/left-small.svg'),
         ],
     }, callback)
 
@@ -258,30 +241,30 @@ const setUpControls = () => {
 }
 
 const showWalkableTiles = (ctx) => {
-    walkableTiles.forEach((row, rowIndex) => {
+    walkablePath.forEach((row, rowIndex) => {
         row.forEach((col, colIndex) => {
             if (col === 1) {
-                ctx.fillStyle = 'rgba(0,255,0,0.75)';
+                ctx.fillStyle = 'rgba(0,255,0,0.35)'
                 ctx.fillRect(
-                    window.tileSize * colIndex,
-                    window.tileSize * rowIndex,
-                    window.tileSize,
-                    window.tileSize
-                );
+                    config.tileSize * colIndex,
+                    config.tileSize * rowIndex,
+                    config.tileSize,
+                    config.tileSize
+                )
             } else if (col === 2) {
-                ctx.fillStyle = 'rgba(255,0,0,0.75)';
+                ctx.fillStyle = 'rgba(255,0,0,0.35)'
                 ctx.fillRect(
-                    window.tileSize * colIndex,
-                    window.tileSize * rowIndex,
-                    window.tileSize,
-                    window.tileSize
-                );
+                    config.tileSize * colIndex,
+                    config.tileSize * rowIndex,
+                    config.tileSize,
+                    config.tileSize
+                )
             }
-        });
-    });
+        })
+    })
 }
 
-ready(() => {
+export default function() {
     let canvas = document.getElementById('characters')
     let ctx = document.getElementById('characters').getContext('2d')
     preloadCharacters(() => {
@@ -293,7 +276,6 @@ ready(() => {
         // pinky.begin(context, 'cpu', 10, 13)
 
         setUpControls()
-        // showWalkableTiles(context)
+        showWalkableTiles(ctx)
     })
-
-})
+}
