@@ -22,10 +22,6 @@ module.exports = {
         test: /\.svg$/i,
         type: 'asset/resource',
       },
-      {
-        test: /\.html$/i,
-        type: 'asset/resource',
-      },
     ],
   },
   plugins: [

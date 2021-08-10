@@ -1,5 +1,5 @@
-import config from './../config.yaml';
-import walkablePath from './characters/walkable-path.json'
+import config from './../../config.yaml';
+import walkablePath from './walkable-path.json'
 const event = new CustomEvent('character-position', { character: this })
 
 
@@ -198,31 +198,31 @@ let pacman = Object.assign({}, Character),
 const preloadCharacters = (callback) => {
     pacman.loadAnimations({
         idle: [
-            require('./characters/pacman/frames/right-smaller.svg'),
+            require('./pacman/frames/right-smaller.svg'),
         ],
         up: [
-            require('./characters/pacman/frames/up-smaller.svg'),
-            require('./characters/pacman/frames/up-small.svg'),
-            require('./characters/pacman/frames/closed.svg'),
-            require('./characters/pacman/frames/up-small.svg'),
+            require('./pacman/frames/up-smaller.svg'),
+            require('./pacman/frames/up-small.svg'),
+            require('./pacman/frames/closed.svg'),
+            require('./pacman/frames/up-small.svg'),
         ],
         right: [
-            require('./characters/pacman/frames/right-smaller.svg'),
-            require('./characters/pacman/frames/right-small.svg'),
-            require('./characters/pacman/frames/closed.svg'),
-            require('./characters/pacman/frames/right-small.svg'),
+            require('./pacman/frames/right-smaller.svg'),
+            require('./pacman/frames/right-small.svg'),
+            require('./pacman/frames/closed.svg'),
+            require('./pacman/frames/right-small.svg'),
         ],
         down: [
-            require('./characters/pacman/frames/down-smaller.svg'),
-            require('./characters/pacman/frames/down-small.svg'),
-            require('./characters/pacman/frames/closed.svg'),
-            require('./characters/pacman/frames/down-small.svg'),
+            require('./pacman/frames/down-smaller.svg'),
+            require('./pacman/frames/down-small.svg'),
+            require('./pacman/frames/closed.svg'),
+            require('./pacman/frames/down-small.svg'),
         ],
         left: [
-            require('./characters/pacman/frames/left-smaller.svg'),
-            require('./characters/pacman/frames/left-small.svg'),
-            require('./characters/pacman/frames/closed.svg'),
-            require('./characters/pacman/frames/left-small.svg'),
+            require('./pacman/frames/left-smaller.svg'),
+            require('./pacman/frames/left-small.svg'),
+            require('./pacman/frames/closed.svg'),
+            require('./pacman/frames/left-small.svg'),
         ],
     }, callback)
 

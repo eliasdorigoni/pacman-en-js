@@ -4,7 +4,7 @@ import Pellets from './components/pellets'
 import Characters from './components/characters'
 import config from './config.yaml'
 
-const createElements = () => {
+const createHTMLElements = () => {
     let wrapper = document.createElement('div'),
     worldCanvas = document.createElement('canvas'),
     charactersCanvas = document.createElement('canvas'),
@@ -38,12 +38,11 @@ const createElements = () => {
     wrapper.appendChild(pelletsCanvas)
     wrapper.appendChild(worldCanvas)
     document.querySelector('body').appendChild(wrapper)
-
 }
 
-
 ready(() => {
-    createElements()
+    createHTMLElements()
+
     World()
     Pellets()
     Characters()
