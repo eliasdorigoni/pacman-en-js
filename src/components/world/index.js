@@ -1,9 +1,13 @@
-import tiles from './world/tile-map.json'
-import config from './../config.yaml';
+import tilePlacement from './tile-placement.json'
+import config from './../../config.yaml';
 
 let worldTiles = []
 
-const preloadWorldTiles = new Promise((resolve, reject) => {
+/**
+ * Precarga los tiles.
+ */
+const preloadTiles = new Promise((resolve, reject) => {
+    // Cada fila es un estilo y cada valor es una variante de ese estilo.
     const groupedTiles = [
         [],
         ['wall-0', 'wall-180'],
@@ -32,7 +36,7 @@ const preloadWorldTiles = new Promise((resolve, reject) => {
                     resolve()
                 }
             }
-            img.src = require(`./world/${groupedTiles[group][tile]}.svg`)
+            img.src = require(`./tiles/${groupedTiles[group][tile]}.svg`)
             imgRow.push(img)
         }
 
@@ -40,14 +44,18 @@ const preloadWorldTiles = new Promise((resolve, reject) => {
     }
 })
 
-const drawWorld = (ctx) => {
+/**
+ * Dibuja el mundo de acuerdo a
+ * @param {CanvasRenderingContext2D} ctx
+ */
+const drawTiles = (ctx, placement) => {
     let xPos, yPos, style, variant
 
-    tiles.forEach((row, rowIndex) => {
+    placement.forEach((row, rowIndex) => {
         row.forEach((col, colIndex) => {
             yPos = rowIndex * config.tileSize
             xPos = colIndex * config.tileSize
-            if (col[0] !== 0) {
+            if (col[0] !== 0) { // Cero es espacio vacío.
                 style = col[0]
                 variant = col[1]
                 ctx.drawImage(worldTiles[style][variant], xPos, yPos)
@@ -61,5 +69,5 @@ export default function() {
     let context = canvas.getContext('2d')
     context.fillStyle = "black"
     context.fillRect(0, 0, canvas.width, canvas.height)
-    preloadWorldTiles.then(() => drawWorld(context))
+    preloadTiles.then(() => drawTiles(context, tilePlacement))
 }

@@ -1,5 +1,5 @@
-import pelletsMap from './pellets/map.json'
-import config from './../config.yaml';
+import pelletsMap from './pellet-placement.json'
+import config from './../../config.yaml';
 
 let availablePellets = [],
     pelletImg = new Image(),
@@ -13,14 +13,14 @@ const preloadPellets = new Promise((resolve, reject) => {
             resolve()
         }
     }
-    pelletImg.src = require('./pellets/pellet.svg')
+    pelletImg.src = require('./frames/pellet.svg')
 
     powerUpImg.onload = () => {
         if (++loadedCount >= 2) {
             resolve()
         }
     }
-    powerUpImg.src = require('./pellets/power-up.svg')
+    powerUpImg.src = require('./frames/power-up.svg')
 })
 
 const drawPellets = (ctx) => {
