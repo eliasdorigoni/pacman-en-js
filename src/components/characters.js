@@ -60,7 +60,10 @@ const Character = {
     },
     allowedMoves: function() {
         // Pasajes del medio
-        if ((this.x === 0 || this.x === 20) && this.y === 13) {
+        if (
+            (this.x === config.teleport.l2r || this.x === config.teleport.r2l)
+            && this.y === config.teleport.row
+        ) {
             return ['left', 'right']
         }
 
@@ -107,10 +110,22 @@ const Character = {
         this.movement.interval = setInterval(() => {
             this.undraw()
 
-            if (this.y === 13 && (this.x === 0 && this.direction.current === 'left')) {
-                this.x = 20
-            } else if (this.y === 13 && (this.x === 20 && this.direction.current === 'right')) {
-                this.x = 0
+            // (this.x === config.teleport.l2r && this.y === config.teleport.row
+            // || this.x === config.teleport.r2l
+
+            if (
+                this.x === config.teleport.l2r
+                && this.y === config.teleport.row
+                && this.direction.current === 'left')
+            {
+                this.x = config.teleport.r2l
+
+            } else if (
+                this.x === config.teleport.r2l
+                && this.y === config.teleport.row
+                && this.direction.current === 'right')
+            {
+                this.x = config.teleport.l2r
             } else if (this.direction.current === 'up') {
                 this.y--
             } else if (this.direction.current === 'down') {
@@ -268,7 +283,7 @@ export default function() {
     let canvas = document.getElementById('characters')
     let ctx = document.getElementById('characters').getContext('2d')
     preloadCharacters(() => {
-        pacman.begin(canvas, ctx, 'player', 10, 15)
+        pacman.begin(canvas, ctx, 'player', 13, 17)
 
         // blinky.begin(context, 'cpu', 10, 12)
         // clyde.begin(context, 'cpu', 11, 13)
@@ -276,6 +291,6 @@ export default function() {
         // pinky.begin(context, 'cpu', 10, 13)
 
         setUpControls()
-        showWalkableTiles(ctx)
+        // showWalkableTiles(ctx)
     })
 }
