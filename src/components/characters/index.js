@@ -198,31 +198,31 @@ let pacman = Object.assign({}, Character),
 const preloadCharacters = (callback) => {
     pacman.loadAnimations({
         idle: [
-            require('./pacman/frames/right-smaller.svg'),
+            require('./pacman/frames/right-small.svg'),
         ],
         up: [
-            require('./pacman/frames/up-smaller.svg'),
             require('./pacman/frames/up-small.svg'),
+            require('./pacman/frames/up-big.svg'),
             require('./pacman/frames/closed.svg'),
-            require('./pacman/frames/up-small.svg'),
+            require('./pacman/frames/up-big.svg'),
         ],
         right: [
-            require('./pacman/frames/right-smaller.svg'),
             require('./pacman/frames/right-small.svg'),
+            require('./pacman/frames/right-big.svg'),
             require('./pacman/frames/closed.svg'),
-            require('./pacman/frames/right-small.svg'),
+            require('./pacman/frames/right-big.svg'),
         ],
         down: [
-            require('./pacman/frames/down-smaller.svg'),
             require('./pacman/frames/down-small.svg'),
+            require('./pacman/frames/down-big.svg'),
             require('./pacman/frames/closed.svg'),
-            require('./pacman/frames/down-small.svg'),
+            require('./pacman/frames/down-big.svg'),
         ],
         left: [
-            require('./pacman/frames/left-smaller.svg'),
             require('./pacman/frames/left-small.svg'),
+            require('./pacman/frames/left-big.svg'),
             require('./pacman/frames/closed.svg'),
-            require('./pacman/frames/left-small.svg'),
+            require('./pacman/frames/left-big.svg'),
         ],
     }, callback)
 
