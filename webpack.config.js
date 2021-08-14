@@ -25,7 +25,9 @@ module.exports = {
     ],
   },
   plugins: [
-    new HtmlWebpackPlugin(),
+    new HtmlWebpackPlugin({
+      template: 'src/index.html'
+    }),
   ],
   devtool: 'inline-source-map',
   devServer: {
@@ -33,6 +35,6 @@ module.exports = {
     compress: true,
     index: 'index.html',
     open: true,
-    port: 5500,
+    port: 3000,
   },
 }
