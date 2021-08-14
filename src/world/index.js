@@ -1,7 +1,7 @@
-import tilePlacement from './tile-placement.json'
-import config from './../../config.yaml';
+import tilePlacement from './../config/world-tiles.json'
+import options from './../config/options.yaml';
 
-let worldTiles = []
+let loadedTiles = []
 
 /**
  * Precarga los tiles.
@@ -17,57 +17,59 @@ const preloadTiles = new Promise((resolve, reject) => {
         ['ghost-exit-joint-0', 'ghost-exit-joint-180'],
         ['t-intersection-0', 't-intersection-90', 't-intersection-180', 't-intersection-270'],
     ]
-
-    const expectedTilesToLoad = groupedTiles.reduce((prev, current) => {
+    const expectedTileCount = groupedTiles.reduce((prev, current) => {
         return prev + current.length
     }, 0)
 
     let img,
         imgRow,
-        loadedTiles = 0
+        loadedTileCount = 0
 
     for (let group in groupedTiles) {
         imgRow = []
-
         for (let tile in groupedTiles[group]) {
             img = new Image()
             img.onload = () => {
-                if (++loadedTiles >= expectedTilesToLoad) {
+                if (++loadedTileCount >= expectedTileCount) {
                     resolve()
                 }
             }
             img.src = require(`./tiles/${groupedTiles[group][tile]}.svg`)
             imgRow.push(img)
         }
-
-        worldTiles.push(imgRow)
+        loadedTiles.push(imgRow)
     }
 })
 
 /**
- * Dibuja el mundo de acuerdo a
  * @param {CanvasRenderingContext2D} ctx
  */
-const drawTiles = (ctx, placement) => {
+const drawTiles = (ctx) => {
     let xPos, yPos, style, variant
-
-    placement.forEach((row, rowIndex) => {
+    tilePlacement.forEach((row, rowIndex) => {
         row.forEach((col, colIndex) => {
-            yPos = rowIndex * config.tileSize
-            xPos = colIndex * config.tileSize
-            if (col[0] !== 0) { // Cero es espacio vacío.
-                style = col[0]
-                variant = col[1]
-                ctx.drawImage(worldTiles[style][variant], xPos, yPos)
+            if (col[0] === 0) {
+                return // cero es espacio vacío.
             }
+            xPos = colIndex * options.tileSize
+            yPos = rowIndex * options.tileSize
+            style = col[0]
+            variant = col[1]
+            ctx.drawImage(loadedTiles[style][variant], xPos, yPos)
         })
     })
 }
 
-export default function() {
-    let canvas = document.getElementById('world')
-    let context = canvas.getContext('2d')
-    context.fillStyle = "black"
-    context.fillRect(0, 0, canvas.width, canvas.height)
-    preloadTiles.then(() => drawTiles(context, tilePlacement))
+const World = {
+    init: () => {
+        const element = document.getElementById('world')
+        let context = element.getContext('2d', { alpha: false })
+        context.fillStyle = "black"
+        context.fillRect(0, 0, element.width, element.height)
+        preloadTiles.then(() =>
+            drawTiles(context)
+        )
+    }
 }
+
+export default World
