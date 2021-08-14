@@ -4,9 +4,10 @@ import WalkablePath from './../config/character-walkable-path.json'
 const Pacman = () => {
     const char = new Character({
         context: document.getElementById('pacman').getContext('2d'),
-        startingX: 1,
-        startingY: 1,
+        startingX: 14,
+        startingY: 23,
         speed: 11,
+        spriteSize: 44,
         walkablePath: WalkablePath,
     })
 

@@ -24,6 +24,8 @@ class Character {
         voffset: 0,
         hoffset: 0,
     }
+    spriteSize = 32
+    spriteOffset = 0
 
     direction = {
         current: '',
@@ -35,14 +37,14 @@ class Character {
         this.context = config.context
         this.x = config.startingX
         this.y = config.startingY
+        this.spriteSize = config.spriteSize
+        this.spriteOffset = Math.round((config.spriteSize - options.tileSize) / 2)
 
         // Calcula en qué frames cambiar la posición del personaje
         const factor = 60 / config.speed
         for (let i = 1; i <= config.speed; i++) {
             this.moveOnFrames.push(Math.round(factor * i))
         }
-
-        // Calcula en qué frames hacer las transiciones entre frames
 
         this.walkablePath = config.walkablePath
     }
@@ -84,8 +86,8 @@ class Character {
     paint() {
         this.context.drawImage(
             this.getCurrentSprite(),
-            this.x * options.tileSize,
-            this.y * options.tileSize
+            this.x * options.tileSize - this.spriteOffset,
+            this.y * options.tileSize - this.spriteOffset
         )
 
         // TODO: disparar los eventos para indicar la posición actual
@@ -94,11 +96,12 @@ class Character {
     /**
      * Elimina la posición actual
      */
-    erase() {
+    unpaint() {
         this.context.clearRect(
-            this.x * options.tileSize,
-            this.y * options.tileSize,
-            options.tileSize, options.tileSize
+            this.x * options.tileSize - this.spriteOffset,
+            this.y * options.tileSize - this.spriteOffset,
+            this.spriteSize,
+            this.spriteSize
         )
     }
 
@@ -136,7 +139,7 @@ class Character {
             return
         }
 
-        this.erase()
+        this.unpaint()
 
         const shouldMove = this.moveOnFrames.includes(this.frame)
 
