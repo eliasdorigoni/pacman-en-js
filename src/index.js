@@ -5,6 +5,7 @@ import Pacman from './pacman'
 
 ready(() => {
     World.init()
+    World.grid()
     Pellets.init()
     Pacman()
 })
