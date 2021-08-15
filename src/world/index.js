@@ -28,7 +28,7 @@ const World = {
             x += options.tileSize
         }
 
-        for (let i = 0; i < 29; i++) {
+        for (let i = 0; i < 32; i++) {
             context.strokeStyle = '#333333';
             context.moveTo(0, y)
             context.lineTo(896, y)
