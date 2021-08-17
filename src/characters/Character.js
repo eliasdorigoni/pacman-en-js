@@ -1,9 +1,11 @@
 import options from './../config/options.yaml';
-import walkablePath from './../config/character-walkable-path.json'
+import walkablePath from './walkable-path.json'
 
 class Character {
-    x = 1
-    y = 1
+    position = {
+        x: 1,
+        y: 1,
+    }
 
     frame = 1 // cuadro de la pantalla, 60 por segundo (FPS)
     moveOnFrames = []
@@ -21,11 +23,15 @@ class Character {
         paint: true,
         currentName: 'idle',
         currentKey: 0, // 0, 1, 2, 3 ...
-        voffset: 0,
-        hoffset: 0,
+
+        /*
+        Número entre -3 y 4 (inclusive).
+        Pacman puede cambiar de dirección en cualquier offset pero los fantasmas sólo en 0.
+        */
+        xOffset: 0,
+        yOffset: 0,
     }
     spriteSize = 32
-    spriteOffset = 0
 
     direction = {
         current: '',
@@ -35,18 +41,40 @@ class Character {
 
     constructor(config) {
         this.context = config.context
-        this.x = config.startingX
-        this.y = config.startingY
-        this.spriteSize = config.spriteSize
-        this.spriteOffset = Math.round((config.spriteSize - options.tileSize) / 2)
+        this.walkablePath = walkablePath
 
-        // Calcula en qué frames cambiar la posición del personaje
+        if (typeof config.x === 'number') {
+            this.position.x = config.x
+        }
+
+        if (typeof config.y === 'number') {
+            this.position.y = config.y
+        }
+
+        if (typeof config.xOffset === 'number') {
+            this.animations.xOffset = config.xOffset
+        }
+
+        if (typeof config.yOffset === 'number') {
+            this.animations.yOffset = config.yOffset
+        }
+
+        if (typeof config.spriteSize === 'number') {
+            // El sprite es más grande que el tile, y hay que centrarlo
+            this.spriteSize = config.spriteSize
+            this.spriteOffset = Math.round((config.spriteSize - options.tileSize) / 2)
+        }
+
+        if (config.enableControls) {
+            this.enableArrowControls()
+        }
+
+        // Calcula en qué frames cambia la posición del personaje cuando se está moviendo
         const factor = 60 / config.speed
         for (let i = 1; i <= config.speed; i++) {
             this.moveOnFrames.push(Math.round(factor * i))
         }
-
-        this.walkablePath = config.walkablePath
+        console.log(this.moveOnFrames)
     }
 
     /**
@@ -75,6 +103,10 @@ class Character {
         })
     }
 
+    /**
+     * Retorna el sprite actual
+     * @returns Image
+     */
     getCurrentSprite() {
         const key = this.animations.sprites[this.animations.currentName][this.animations.currentKey]
         return this.sprites[key]
@@ -86,8 +118,8 @@ class Character {
     paint() {
         this.context.drawImage(
             this.getCurrentSprite(),
-            this.x * options.tileSize - this.spriteOffset,
-            this.y * options.tileSize - this.spriteOffset
+            ((this.position.x * options.tileSize) - this.spriteOffset) + this.animations.xOffset,
+            ((this.position.y * options.tileSize) - this.spriteOffset) + this.animations.yOffset
         )
 
         // TODO: disparar los eventos para indicar la posición actual
@@ -98,8 +130,8 @@ class Character {
      */
     unpaint() {
         this.context.clearRect(
-            this.x * options.tileSize - this.spriteOffset,
-            this.y * options.tileSize - this.spriteOffset,
+            ((this.position.x * options.tileSize) - this.spriteOffset) + this.animations.xOffset,
+            ((this.position.y * options.tileSize) - this.spriteOffset) + this.animations.yOffset,
             this.spriteSize,
             this.spriteSize
         )
@@ -129,10 +161,19 @@ class Character {
     }
 
     /**
+     * @param {integer} frame Cuadro tickeado (60 por segundo)
+     */
+    tick(frame) {
+        this.prepareNextFrame()
+        this.paint()
+    }
+
+
+    /**
      * Actualiza las props para pintar el siguiente cuadro. Llamar inmediatamente
      * antes de pintar.
      */
-    prepareNextFrame() {
+    prepareNextFrame(onPositionChange) {
         this.frame = this.frame < 60 ? this.frame + 1 : 1
 
         if (!this.direction.isMoving) {
@@ -159,25 +200,25 @@ class Character {
         }
 
         if (
-            this.x === options.teleport.l2r && this.y === options.teleport.row && this.direction.current === 'left'
+            this.position.x === options.teleport.l2r && this.position.y === options.teleport.row && this.direction.current === 'left'
         ) {
-            this.x = options.teleport.r2l
+            this.position.x = options.teleport.r2l
 
         } else if (
-            this.x === options.teleport.r2l && this.y === options.teleport.row && this.direction.current === 'right'
+            this.position.x === options.teleport.r2l && this.position.y === options.teleport.row && this.direction.current === 'right'
         ) {
-            this.x = options.teleport.l2r
+            this.position.x = options.teleport.l2r
         } else if (this.direction.current === 'up') {
-            this.y--
+            this.position.y--
         } else if (this.direction.current === 'down') {
-            this.y++
+            this.position.y++
         } else if (this.direction.current === 'left') {
-            this.x--
+            this.position.x--
         } else if (this.direction.current === 'right') {
-            this.x++
+            this.position.x++
         }
 
-        // TODO: emitir evento o llamar callbacks sobre el cambio de posición
+        // TODO: agregar callback
 
         const currentFrameKeys = this.animations.sprites[this.animations.currentName]
         if (this.animations.currentKey < currentFrameKeys.length - 1) {
@@ -221,19 +262,19 @@ class Character {
         }
 
         let allowedMoves = []
-        if (walkablePath[this.y - 1][this.x] === 1) {
+        if (walkablePath[this.position.y - 1][this.position.x] === 1) {
             allowedMoves.push('up')
         }
 
-        if (walkablePath[this.y + 1][this.x] === 1) {
+        if (walkablePath[this.position.y + 1][this.position.x] === 1) {
             allowedMoves.push('down')
         }
 
-        if (walkablePath[this.y][this.x - 1] === 1) {
+        if (walkablePath[this.position.y][this.position.x - 1] === 1) {
             allowedMoves.push('left')
         }
 
-        if (walkablePath[this.y][this.x + 1] === 1) {
+        if (walkablePath[this.position.y][this.position.x + 1] === 1) {
             allowedMoves.push('right')
         }
 
@@ -241,7 +282,32 @@ class Character {
     }
 
     canMoveTo(direction) {
-        return this.getAllowedMoves(this.x, this.y).includes(direction)
+        return this.getAllowedMoves(this.position.x, this.position.y).includes(direction)
+    }
+
+    toggleWalkableTiles = (isVisible) => {
+        walkablePath.forEach((row, rowIndex) => {
+            row.forEach((col, colIndex) => {
+                if (col === 1) {
+                    if (isVisible) {
+                        context.fillStyle = 'rgba(0,255,0,0.35)'
+                        context.fillRect(
+                            config.tileSize * colIndex,
+                            config.tileSize * rowIndex,
+                            config.tileSize,
+                            config.tileSize
+                        )
+                    } else {
+                        this.context.clearRect(
+                            config.tileSize * colIndex,
+                            config.tileSize * rowIndex,
+                            options.tileSize,
+                            options.tileSize
+                        )
+                    }
+                }
+            })
+        })
     }
 }
 
