@@ -9,8 +9,7 @@
   },
   "scripts": {
     "start": "webpack serve --config webpack.config.js --mode=development",
-    "build": "webpack --config webpack.config.js --mode=production",
-    "watch": "webpack --config webpack.config.js --mode=development --watch"
+    "build": "webpack --config webpack.config.js --mode=production"
   },
   "devDependencies": {
     "html-webpack-plugin": "^5.3.2",
