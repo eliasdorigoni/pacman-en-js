@@ -5,22 +5,18 @@ import Pacman from './characters/pacman'
 
 function main(timestamp) {
     window.requestAnimationFrame(main)
-
-    // World.tick()
     Pellets.tick(timestamp)
     // Pacman.tick()
 }
 
 ready(() => {
-
     Promise.all([
         World.init(),
         World.grid(),
         Pellets.init(),
-        // Pacman(),
+        Pacman.init(),
     ]).then(() => {
         console.log('Todo cargado')
         window.requestAnimationFrame(main)
     })
-
 })
