@@ -1,7 +1,7 @@
 import pelletPositions from './positions.json'
 import config from './../config/options.yaml';
 
-let context, // canvas
+let context,
     availablePellets = pelletPositions,
     pelletImages = ['', 'pellet', 'power-up'],
     powerUpLocations = []
@@ -58,16 +58,17 @@ const Pellets = {
         }
     },
     paintAllPellets: function() {
-        let xPos, yPos
         availablePellets.forEach((row, rowIndex) => {
             row.forEach((col, colIndex) => {
                 if (col === 0) {
                     return
                 }
 
-                yPos = rowIndex * config.tileSize
-                xPos = colIndex * config.tileSize
-                context.drawImage(pelletImages[col], xPos, yPos)
+                context.drawImage(
+                    pelletImages[col],
+                    colIndex * config.tileSize,
+                    rowIndex * config.tileSize
+                )
 
                 if (col === 2) {
                     powerUpLocations.push([rowIndex, colIndex])
@@ -86,8 +87,6 @@ const Pellets = {
         }
     },
     togglePowerUps: function(show) {
-        let xPos, yPos
-
         if (show) {
             powerUpLocations.map(([x,y]) => {
                 if (availablePellets[x][y] === 2) {
@@ -105,7 +104,7 @@ const Pellets = {
                     x * config.tileSize,
                     config.tileSize,
                     config.tileSize
-                    )
+                )
             })
         }
     },

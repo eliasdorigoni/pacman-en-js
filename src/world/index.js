@@ -21,7 +21,7 @@ const World = {
         let x = 0,
             y = 0
 
-        for (let i = 0; i <= (options.columns + 1); i++) {
+        for (let i = 0; i < (options.columns + 2); i++) {
             context.strokeStyle = '#333333';
             context.moveTo(x, 0)
             context.lineTo(x, 992)
@@ -29,7 +29,7 @@ const World = {
             x += options.tileSize
         }
 
-        for (let i = 0; i <= (options.rows + 1); i++) {
+        for (let i = 0; i < (options.rows + 2); i++) {
             context.strokeStyle = '#333333';
             context.moveTo(0, y)
             context.lineTo(896, y)
