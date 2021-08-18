@@ -2,79 +2,78 @@ import options from './../config/options.yaml';
 import walkablePath from './walkable-path.json'
 
 class Character {
+    context = undefined
+    walkablePath = walkablePath
+
     position = {
-        x: 1,
-        y: 1,
+        tile: [1, 1], // x, y
+        precise: [1.0, 1.0], // x, y
+        fixedPrecise: [1.0, 1.0], // igual a precise pero ajustado por offset
+        changed: true,
     }
-
-    frame = 1 // cuadro de la pantalla, 60 por segundo (FPS)
-    moveOnFrames = []
-    transitionOnFrames = []
-
-    sprites = [] // diseños del personaje
-    animations = {
-        sprites: {
-            idle: [],
-            up: [],
-            down: [],
-            left: [],
-            right: [],
-        },
-        paint: true,
-        currentName: 'idle',
-        currentKey: 0, // 0, 1, 2, 3 ...
-
-        /*
-        Número entre -3 y 4 (inclusive).
-        Pacman puede cambiar de dirección en cualquier offset pero los fantasmas sólo en 0.
-        */
-        xOffset: 0,
-        yOffset: 0,
-    }
-    spriteSize = 32
+    speed = 11.0 // Velocidad base (tiles por segundo transcurrido)
+    distancePerMs = 1.0 // Distancia recorrida (en píxeles) por milisegundo transcurrido.
+    lastTimestamp = 0.0
+    elapsedTime = 0.0
 
     direction = {
         current: '',
-        queued: '',
         isMoving: false,
     }
 
-    constructor(config) {
-        this.context = config.context
-        this.walkablePath = walkablePath
-
-        if (typeof config.x === 'number') {
-            this.position.x = config.x
+    sprites = [] // Archivos del personaje
+    spriteSize = [32, 32] // Tamaño en píxeles, ancho / alto
+    spriteOffset = [0, 0] // Si el sprite tiene más de 32px hay que centrarlo.
+    animations = {
+        keys: {
+            idle:  [],
+            up:    [],
+            down:  [],
+            left:  [],
+            right: [],
+        },
+        current: {
+            index: 0,
+            sprites: [],
         }
+    }
 
-        if (typeof config.y === 'number') {
-            this.position.y = config.y
-        }
+    /**
+     *
+     * @param {CanvasRenderingContext2D} context
+     * @param {array} startingTile Posición precisa (X / Y)
+     * @param {array} spriteSize Tamaño en píxeles (ancho / alto)
+     */
+    constructor(context, startingPosition, spriteSize) {
+        this.context = context
+        this.position.tile = startingPosition
+        this.spriteSize = spriteSize
+        this.spriteOffset = spriteSize.map(size => Math.round((size - options.tileSize) / 2))
 
-        if (typeof config.xOffset === 'number') {
-            this.animations.xOffset = config.xOffset
-        }
+        this.calculateSpeed()
+        this.setPosition(startingPosition[0], startingPosition[1])
+    }
 
-        if (typeof config.yOffset === 'number') {
-            this.animations.yOffset = config.yOffset
-        }
+    /**
+     * Calcula la velocidad del personaje y las distancias
+     */
+    calculateSpeed() {
+        this.distancePerMs = (this.speed / 1000) * options.tileSize
+    }
 
-        if (typeof config.spriteSize === 'number') {
-            // El sprite es más grande que el tile, y hay que centrarlo
-            this.spriteSize = config.spriteSize
-            this.spriteOffset = Math.round((config.spriteSize - options.tileSize) / 2)
-        }
-
-        if (config.enableControls) {
-            this.enableArrowControls()
-        }
-
-        // Calcula en qué frames cambia la posición del personaje cuando se está moviendo
-        const factor = 60 / config.speed
-        for (let i = 1; i <= config.speed; i++) {
-            this.moveOnFrames.push(Math.round(factor * i))
-        }
-        console.log(this.moveOnFrames)
+    /**
+     * Define la posición precisa y la del tile
+     *
+     * @param {float} preciseX
+     * @param {float} preciseY
+     */
+    setPosition(preciseX, preciseY) {
+        this.position.precise = [preciseX, preciseY]
+        this.position.fixedPrecise = [
+            preciseX - this.spriteOffset[0],
+            preciseY - this.spriteOffset[1],
+        ]
+        this.position.tile = this.position.precise.map(pos => Math.floor(pos / options.tileSize))
     }
 
     /**
@@ -85,16 +84,16 @@ class Character {
      */
     loadAnimationSprites(sprites, keys) {
         let expectedFrameCount = sprites.length,
-            loadedFrameCount = 0
+            loadedFramesCount = 0
 
-        this.animations.sprites = keys
+        this.animations.keys = keys
 
-        return new Promise((resolve, reject) => {
+        return new Promise((res, rej) => {
             sprites.map(frame => {
                 let image = new Image()
                 image.onload = () => {
-                    if (++loadedFrameCount >= expectedFrameCount) {
-                        resolve()
+                    if (++loadedFramesCount >= expectedFrameCount) {
+                        res()
                     }
                 }
                 image.src = frame
@@ -104,25 +103,15 @@ class Character {
     }
 
     /**
-     * Retorna el sprite actual
-     * @returns Image
-     */
-    getCurrentSprite() {
-        const key = this.animations.sprites[this.animations.currentName][this.animations.currentKey]
-        return this.sprites[key]
-    }
-
-    /**
      * Dibuja el personaje de acuerdo a las propiedades actuales
      */
     paint() {
         this.context.drawImage(
-            this.getCurrentSprite(),
-            ((this.position.x * options.tileSize) - this.spriteOffset) + this.animations.xOffset,
-            ((this.position.y * options.tileSize) - this.spriteOffset) + this.animations.yOffset
+            this.animations.current.sprites[this.animations.current.index],
+            this.position.fixedPrecise[0],
+            this.position.fixedPrecise[1]
         )
-
-        // TODO: disparar los eventos para indicar la posición actual
+        // TODO: disparar evento para indicar la posición actual
     }
 
     /**
@@ -140,22 +129,25 @@ class Character {
     /**
      * Activa el control mediante las flechas para este personaje
      */
-    enableArrowControls() {
+    enableControls() {
         document.onkeydown = (e) => {
-            if (['ArrowUp', 'W', 'w'].includes(e.key)) {
-                this.changeDirection('up');
-            }
-
-            if (['ArrowRight', 'D', 'd'].includes(e.key)) {
-                this.changeDirection('right');
-            }
-
-            if (['ArrowDown', 'S', 's'].includes(e.key)) {
-                this.changeDirection('down');
-            }
-
-            if (['ArrowLeft', 'A', 'a'].includes(e.key)) {
-                this.changeDirection('left');
+            switch (e.key.toLowerCase()) {
+                case 'arrowup':
+                case 'w':
+                    this.changeDirection('up')
+                    break
+                case 'arrowright':
+                case 'd':
+                    this.changeDirection('right')
+                    break
+                case 'arrowdown':
+                case 's':
+                    this.changeDirection('down')
+                    break
+                case 'arrowleft':
+                case 'a':
+                    this.changeDirection('left')
+                    break
             }
         }
     }
@@ -163,42 +155,19 @@ class Character {
     /**
      * @param {integer} frame Cuadro tickeado (60 por segundo)
      */
-    tick(frame) {
-        this.prepareNextFrame()
-        this.paint()
-    }
-
-
-    /**
-     * Actualiza las props para pintar el siguiente cuadro. Llamar inmediatamente
-     * antes de pintar.
-     */
-    prepareNextFrame(onPositionChange) {
-        this.frame = this.frame < 60 ? this.frame + 1 : 1
-
+    tick(timestamp) {
         if (!this.direction.isMoving) {
+            // TODO: hacer algo?
             return
         }
 
-        this.unpaint()
-
-        const shouldMove = this.moveOnFrames.includes(this.frame)
-
-        if (this.canMoveTo(this.direction.queued)) {
-            this.animations.currentName = this.direction.queued
-            this.animations.currentKey = 0
-            this.direction.current = this.direction.queued
-            this.direction.queued = ''
-
-        } else if (!this.canMoveTo(this.direction.current)) {
+        if (!this.canMoveTo(this.direction.current)) {
             this.direction.current = ''
             this.direction.isMoving = false
         }
 
-        if (!shouldMove) {
-            return
-        }
-
+        // TODO: calcular teleport
+        /*
         if (
             this.position.x === options.teleport.l2r && this.position.y === options.teleport.row && this.direction.current === 'left'
         ) {
@@ -217,36 +186,44 @@ class Character {
         } else if (this.direction.current === 'right') {
             this.position.x++
         }
+        */
 
-        // TODO: agregar callback
+        this.unpaint()
+        this.calculateFrame()
+        this.paint()
+    }
 
-        const currentFrameKeys = this.animations.sprites[this.animations.currentName]
-        if (this.animations.currentKey < currentFrameKeys.length - 1) {
-            this.animations.currentKey++
+    /**
+     * Actualiza las props para pintar el siguiente cuadro.
+     */
+     calculateFrame() {
+        if (!this.position.changed) {
+            return
+        }
+
+        // Avanza la animación
+        if (this.animations.current.key == (this.animations.current.sprites.length - 1)) {
+            this.animations.current.key = 0
         } else {
-            this.animations.currentKey = 0
+            this.animations.current.key += 1
         }
     }
 
     /**
-     * Cambia la dirección del personaje y lo pone en movimiento.
+     * Cambia la dirección del personaje.
      *
      * @param {string} direction 'up', 'down', 'left', 'right'
      */
-    changeDirection(direction) {
-        if (!this.canMoveTo(direction)) {
-            if (this.direction.isMoving) {
-                this.direction.queued = direction
-            }
+    changeDirection(newDirection) {
+        if (!this.canMoveTo(newDirection)) {
             return
         }
 
-        this.direction.queued = ''
-        this.direction.current = direction
+        this.direction.current = newDirection
         this.direction.isMoving = true
 
-        this.animations.currentName = direction
-        this.animations.currentKey = 0
+        this.animations.current.index = 0
+        this.animations.current.sprites = this.animations.keys[newDirection].map(key => this.sprites[key])
     }
 
     /**
@@ -262,19 +239,20 @@ class Character {
         }
 
         let allowedMoves = []
-        if (walkablePath[this.position.y - 1][this.position.x] === 1) {
+
+        if (this.walkablePath[this.position.tile[1] - 1][this.position.tile[0]] === 1) {
             allowedMoves.push('up')
         }
 
-        if (walkablePath[this.position.y + 1][this.position.x] === 1) {
+        if (this.walkablePath[this.position.tile[1] + 1][this.position.tile[0]] === 1) {
             allowedMoves.push('down')
         }
 
-        if (walkablePath[this.position.y][this.position.x - 1] === 1) {
+        if (this.walkablePath[this.position.tile[1]][this.position.tile[0] - 1] === 1) {
             allowedMoves.push('left')
         }
 
-        if (walkablePath[this.position.y][this.position.x + 1] === 1) {
+        if (this.walkablePath[this.position.tile[1]][this.position.tile[0] + 1] === 1) {
             allowedMoves.push('right')
         }
 
@@ -288,26 +266,35 @@ class Character {
     toggleWalkableTiles = (isVisible) => {
         walkablePath.forEach((row, rowIndex) => {
             row.forEach((col, colIndex) => {
-                if (col === 1) {
-                    if (isVisible) {
-                        context.fillStyle = 'rgba(0,255,0,0.35)'
-                        context.fillRect(
-                            config.tileSize * colIndex,
-                            config.tileSize * rowIndex,
-                            config.tileSize,
-                            config.tileSize
-                        )
-                    } else {
-                        this.context.clearRect(
-                            config.tileSize * colIndex,
-                            config.tileSize * rowIndex,
-                            options.tileSize,
-                            options.tileSize
-                        )
-                    }
+                if (col !== 1) {
+                    return
+                }
+                if (isVisible) {
+                    context.fillStyle = 'rgba(0,255,0,0.35)'
+                    context.fillRect(
+                        options.tileSize * colIndex,
+                        options.tileSize * rowIndex,
+                        options.tileSize,
+                        options.tileSize
+                    )
+                } else {
+                    this.context.clearRect(
+                        options.tileSize * colIndex,
+                        options.tileSize * rowIndex,
+                        options.tileSize,
+                        options.tileSize
+                    )
                 }
             })
         })
+    }
+
+    setIdleAnimation() {
+        this.direction.current = 'idle'
+        this.direction.isMoving = false
+
+        this.animations.current.index = 0
+        this.animations.current.sprites = this.animations.keys.idle.map(key => this.sprites[key])
     }
 }
 
