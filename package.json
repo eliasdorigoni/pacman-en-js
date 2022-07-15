@@ -4,18 +4,18 @@
   "description": "",
   "main": "webpack.config.js",
   "dependencies": {
-    "webpack": "^5.49.0",
-    "webpack-cli": "^4.7.2"
+    "webpack": "^5.73",
+    "webpack-cli": "^4.10"
+  },
+  "devDependencies": {
+    "html-webpack-plugin": "^5.5.0",
+    "svgo-loader": "^3.0.1",
+    "webpack-dev-server": "^4.9.3",
+    "yamljs": "^0.3.0"
   },
   "scripts": {
     "start": "webpack serve --config webpack.config.js --mode=development",
     "build": "webpack --config webpack.config.js --mode=production"
-  },
-  "devDependencies": {
-    "html-webpack-plugin": "^5.3.2",
-    "svgo-loader": "^3.0.0",
-    "webpack-dev-server": "^3.11.2",
-    "yamljs": "^0.3.0"
   },
   "repository": {
     "type": "git",

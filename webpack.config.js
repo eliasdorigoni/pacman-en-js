@@ -31,10 +31,13 @@ module.exports = {
   ],
   devtool: 'inline-source-map',
   devServer: {
-    contentBase: path.join(__dirname, 'public'),
-    compress: true,
-    index: 'index.html',
     open: true,
     port: 3000,
+    devMiddleware: {
+      index: 'index.html',
+    },
+    static: {
+      directory: path.join(__dirname, 'public'),
+    },
   },
 }
