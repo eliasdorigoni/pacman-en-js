@@ -1,4 +1,4 @@
-import options from './../config/options.yaml';
+import options from '../config.yaml';
 import walkablePath from './walkable-path.json'
 
 class Character {
@@ -39,9 +39,8 @@ class Character {
     }
 
     /**
-     *
      * @param {CanvasRenderingContext2D} context
-     * @param {array} startingTile Posición precisa (X / Y)
+     * @param {array} startingPosition Posición precisa (X / Y)
      * @param {array} spriteSize Tamaño en píxeles (ancho / alto)
      */
     constructor(context, startingPosition, spriteSize) {
@@ -80,6 +79,7 @@ class Character {
      * Carga todos los frames del Character en this.sprites
      *
      * @param {array} sprites Lista de imagenes en SVG
+     * @param keys
      * @returns Promise
      */
     loadAnimationSprites(sprites, keys) {
@@ -88,7 +88,7 @@ class Character {
 
         this.animations.keys = keys
 
-        return new Promise((res, rej) => {
+        return new Promise((res) => {
             sprites.map(frame => {
                 let image = new Image()
                 image.onload = () => {
@@ -153,7 +153,7 @@ class Character {
     }
 
     /**
-     * @param {integer} frame Cuadro tickeado (60 por segundo)
+     * @param {int} timestamp Cuadro tickeado (60 por segundo)
      */
     tick(timestamp) {
         if (!this.direction.isMoving) {
@@ -202,7 +202,7 @@ class Character {
         }
 
         // Avanza la animación
-        if (this.animations.current.key == (this.animations.current.sprites.length - 1)) {
+        if ((this.animations.current.sprites.length - 1) === this.animations.current.key) {
             this.animations.current.key = 0
         } else {
             this.animations.current.key += 1
@@ -212,7 +212,7 @@ class Character {
     /**
      * Cambia la dirección del personaje.
      *
-     * @param {string} direction 'up', 'down', 'left', 'right'
+     * @param {string} newDirection 'up', 'down', 'left', 'right'
      */
     changeDirection(newDirection) {
         if (!this.canMoveTo(newDirection)) {

@@ -1,5 +1,5 @@
 import Character from './../Character'
-import options from './../../config/options.yaml'
+import options from '../../config.yaml'
 
 const Pacman = new Character(
     document.getElementById('pacman').getContext('2d'),
@@ -29,7 +29,7 @@ const animationKeys = {
     right: [0, 7, 8],
 }
 
-Pacman.init = () => new Promise((res, rej) => {
+Pacman.init = () => new Promise((res) => {
     Pacman.loadAnimationSprites(animationSprites, animationKeys)
         .then(() => {
             Pacman.setIdleAnimation()

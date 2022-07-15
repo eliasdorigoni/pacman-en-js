@@ -1,0 +1,14 @@
+# The game dimensions in square tiles.
+rows: 31
+columns: 28
+
+# The size in pixels of each tile.
+tileSize: 32
+
+offsetSize: 5
+
+# The teleporter location
+teleport:
+  row: 14
+  l2r: 0
+  r2l: 27

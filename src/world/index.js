@@ -1,7 +1,7 @@
-import options from './../config/options.yaml'
+import options from '../config.yaml'
 
 const World = {
-    init: () => new Promise((res, rej) => {
+    init: () => new Promise((res) => {
         const element = document.getElementById('world')
         const context = element.getContext('2d', { alpha: false })
         const bg = new Image()
@@ -14,7 +14,7 @@ const World = {
         }
         bg.src = require('./background.svg')
     }),
-    grid: () => new Promise((res, rej) => {
+    grid: () => new Promise((res) => {
         const context = document.getElementById('grid').getContext("2d");
         context.beginPath()
 

@@ -1,5 +1,5 @@
 import pelletPositions from './positions.json'
-import config from './../config/options.yaml';
+import config from '../config.yaml';
 
 let context,
     availablePellets = pelletPositions,
@@ -12,7 +12,7 @@ const Pellets = {
     elapsedTime: 0, // en milisegundos
     powerUpIsVisible: true,
 
-    preloadImages: new Promise((resolve, reject) => {
+    preloadImages: new Promise((res) => {
         let loadedCount = 0
         pelletImages = pelletImages.map((name) => {
             if (name === '') {
@@ -20,7 +20,7 @@ const Pellets = {
             }
 
             let img = new Image()
-            img.onload = () => ++loadedCount >= 2 ? resolve() : 0
+            img.onload = () => ++loadedCount >= 2 ? res() : 0
             if (name === 'pellet') {
                 img.src = require('./frames/pellet.svg')
             }
@@ -31,7 +31,7 @@ const Pellets = {
         })
     }),
     init: function() {
-        return new Promise((res, rej) => {
+        return new Promise((res) => {
             context = document.getElementById('pellets').getContext('2d')
             this.preloadImages.then(() => {
                 this.paintAllPellets(context)
