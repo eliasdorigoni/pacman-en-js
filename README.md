@@ -1,27 +1,22 @@
-**Under construction!**
+This is web developer's first attempt at creating a game using web technologies.
 
-This is Pacman in Javascript, as vanilla as it can be without impeding development.
+For research and fun purposes I'm building a Pacman clone, as close to the first original version as possible, using mostly plain Javascript (with some help from Webpack) and documenting the process in [my blog](https://eliasdorigoni.com/categories/pacman).
 
-Last build available at [pacman-en-js.netlify.app](https://pacman-en-js.netlify.app/)
+## Are we there yet?
+No! this is still under construction. The last build, if it works, is available at [pacman-en-js.netlify.app](https://pacman-en-js.netlify.app/)
 
 # Installation
 
 ```shell
 nvm install
+npm install
 npm start # runs the dev server at localhost:3000
 ```
 
-Run `npm run build` to export compressed assets to the `/public` directory.
-
-# About this version
-This is just a version, as close to the original as possible, that can be played in the browser.
-
-It runs on many transparent html canvases, that are drawn 60 times per second thanks to `window.requestAnimationFrame`. There is one canvas for each group: the world, all the pellets (the yellow points), Pacman and the ghosts.
-
-Enemy AI is not the top priority, but I'll try to make it passable at least.
+Execute `npm run build` to export compressed assets to the `/public` directory and serve that folder Apache, Nginx or whatever you like: it's all static files for the frontend.
 
 # References
 
-* [The Pac-man Dossier - Gamasutra](https://www.gamasutra.com/view/feature/3938/the_pacman_dossier.php?print=1)
-* [Designing Pac-man - Slideshare](https://www.slideshare.net/grimlockt/pac-man-6561257)
-* [Arcade Game: Pac-Man (1980 Namco (Midway License for US release)) - YouTube](https://www.youtube.com/watch?v=dScq4P5gn4A)
+* [Gamasutra - The Pac-man Dossier](https://www.gamasutra.com/view/feature/3938/the_pacman_dossier.php?print=1) / ([alternative link](https://www.gamedeveloper.com/design/the-pac-man-dossier))
+* [Slideshare - Designing Pac-man](https://www.slideshare.net/grimlockt/pac-man-6561257)
+* [Youtube - Arcade Game: Pac-Man (1980 Namco (Midway License for US release))](https://www.youtube.com/watch?v=dScq4P5gn4A)
