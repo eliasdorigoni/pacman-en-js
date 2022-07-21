@@ -14,20 +14,20 @@
 
       html {
         background-color: #000;
+        color: #fff;
+        font-family: sans-serif;
         line-height: 1.15;
         -webkit-text-size-adjust: 100%;
       }
 
       body {
-        font-family: sans-serif;
-        color: #fff;
         margin: 0;
       }
 
       main {
         display: block;
+        max-width: 500px;
         padding: 1em;
-        width: 500px;
       }
 
       .canvas-wrapper {
@@ -40,6 +40,11 @@
       canvas {
         height: 100%;
         width: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
       }
 
       a {
@@ -50,43 +55,20 @@
         text-align: center;
       }
 
-      .layer {
-        position:absolute;
-        left:0;
-        top:0;
-        right: 0;
-        bottom: 0;
-      }
-
-      #grid {
-        z-index: 4;
-      }
-
-      #pacman {
-        z-index: 3;
-      }
-
-      #pellets {
-        z-index: 2;
-      }
-
-      #world {
-        z-index: 1;
-      }
     </style>
   </head>
   <body>
     <main>
       <div class="canvas-wrapper">
-        <canvas class="layer" id="grid"></canvas>
-        <canvas class="layer" id="pacman"></canvas>
-        <canvas class="layer" id="pellets"></canvas>
-        <canvas class="layer" id="world"></canvas>
+        <canvas id="world"></canvas>
+        <canvas id="pellets"></canvas>
+        <canvas id="pacman"></canvas>
+        <canvas id="grid"></canvas>
       </div>
 
       <p>
         Hosted on Netlify.<br>
-        <a target="_blank" rel="noopener noreferrer" href="https://github.com/eliasdorigoni/pacman">GitHub</a>
+        <a target="_blank" rel="noopener noreferrer" href="https://github.com/eliasdorigoni/pacman">Source code</a> / <a target="_blank" rel="noopener noreferrer" href="https://eliasdorigoni.com/categories/pacman">Dev diary</a>
       </p>
     </main>
   </body>
