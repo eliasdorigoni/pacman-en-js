@@ -3,9 +3,9 @@ const yaml = require('yamljs');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  entry: './src/index.js',
+  entry: './src/app.js',
   output: {
-    filename: './js/index.js',
+    filename: './js/app.js',
     path: path.resolve(__dirname, 'public'),
     clean: true,
   },

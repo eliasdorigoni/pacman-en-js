@@ -58,6 +58,10 @@
         bottom: 0;
       }
 
+      #grid {
+        z-index: 4;
+      }
+
       #pacman {
         z-index: 3;
       }
@@ -74,9 +78,9 @@
   <body>
     <main>
       <div class="canvas-wrapper">
+        <canvas class="layer" id="grid"></canvas>
         <canvas class="layer" id="pacman"></canvas>
         <canvas class="layer" id="pellets"></canvas>
-        <canvas class="layer" id="grid"></canvas>
         <canvas class="layer" id="world"></canvas>
       </div>
 
