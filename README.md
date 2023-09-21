@@ -8,9 +8,8 @@ No! this is still under construction. The last build, if it works, is available 
 # Installation
 
 ```shell
-nvm install
-npm install
-npm start # runs the dev server at localhost:3000
+docker build . -t pacman/node-web-app
+docker run -p 3000:3000 pacman/node-web-app
 ```
 
 Execute `npm run build` to export compressed assets to the `/public` directory and serve that folder Apache, Nginx or whatever you like: it's all static files for the frontend.
